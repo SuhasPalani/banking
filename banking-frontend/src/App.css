@@ -1,0 +1,295 @@
+/* Reset and base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  line-height: 1.6;
+  background-color: #f5f7fa;
+  color: #333;
+}
+
+/* App container */
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Navigation */
+.main-nav {
+  background-color: white;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-brand {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2c5282;
+}
+
+.nav-links {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.nav-btn {
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.nav-btn:not(.primary) {
+  color: #4a5568;
+}
+
+.nav-btn:not(.primary):hover {
+  background-color: #edf2f7;
+}
+
+.nav-btn.primary {
+  background-color: #2c5282;
+  color: white;
+}
+
+.nav-btn.primary:hover {
+  background-color: #2d3748;
+}
+
+/* Main content */
+.content {
+  flex: 1;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Bank Grid */
+.bank-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+  padding: 1rem;
+}
+
+/* Bank Card */
+.bank-card {
+  background-color: white;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  min-height: 100px;
+}
+
+.bank-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.bank-card h3 {
+  color: #2d3748;
+  margin-bottom: 1rem;
+}
+
+.bank-details {
+  margin-top: 1rem;
+  animation: fadeIn 0.3s ease;
+}
+
+.bank-details p {
+  margin-bottom: 0.5rem;
+}
+
+.bank-details a {
+  color: #2c5282;
+  text-decoration: none;
+  display: inline-block;
+  margin: 0.5rem 0;
+}
+
+.bank-details a:hover {
+  text-decoration: underline;
+}
+
+.bank-details h4 {
+  margin: 1rem 0 0.5rem;
+  color: #4a5568;
+}
+
+.bank-details ul {
+  list-style-position: inside;
+  margin-bottom: 1rem;
+}
+
+.bank-details li {
+  margin-bottom: 0.25rem;
+  color: #4a5568;
+}
+
+/* Auth Forms */
+.auth-form-container {
+  max-width: 400px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.auth-form-container h2 {
+  text-align: center;
+  color: #2d3748;
+  margin-bottom: 1.5rem;
+}
+
+.auth-form-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.auth-form-container input {
+  padding: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
+}
+
+.auth-form-container input:focus {
+  outline: none;
+  border-color: #2c5282;
+}
+
+.auth-form-container button {
+  background-color: #2c5282;
+  color: white;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.auth-form-container button:hover {
+  background-color: #2d3748;
+}
+
+/* Utility Classes */
+.loading-spinner {
+  text-align: center;
+  padding: 2rem;
+  color: #4a5568;
+}
+
+.error-message {
+  text-align: center;
+  padding: 2rem;
+  color: #e53e3e;
+  background-color: #fff5f5;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .main-nav {
+    padding: 1rem;
+  }
+  
+  .content {
+    padding: 1rem;
+  }
+  
+  .bank-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .auth-form-container {
+    margin: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-brand {
+    font-size: 1.25rem;
+  }
+  
+  .nav-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+}
+
+.banking-page {
+  max-width: 600px;
+  margin: auto;
+  padding: 20px;
+}
+
+.card-application-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.card-application-form .form-group {
+  margin-bottom: 15px;
+}
+
+.card-application-form label {
+  margin-bottom: 5px;
+}
+
+.card-application-form input,
+.card-application-form select {
+  padding: 10px;
+  font-size: 1rem;
+}
+
+.card-application-form button {
+  padding: 10px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.card-application-form button:hover {
+  background-color: #45a049;
+}
+
+.message {
+  margin-top: 15px;
+}
