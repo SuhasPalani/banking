@@ -13,20 +13,28 @@ app = Flask(__name__)
 CORS(app, supports_credentials=True)
 
 # Use environment variable for secret key
-app.secret_key = os.getenv("SECRET_KEY")
+app.secret_key = os.getenv(
+    "SECRET_KEY", "your-secret-key"
+)  # Loads SECRET_KEY from .env
 
-# Use environment variable for Mongo URI
-app.config["MONGO_URI"] = os.getenv("MONGO_URI")
+# MongoDB credentials and URI
+MONGODB_USER = os.getenv("MONGODB_USER")  # Loads the MongoDB username from .env
+MONGODB_PASSWORD = os.getenv("MONGODB_PASSWORD")  # Loads the MongoDB password from .env
 
+# Construct the MongoDB URI dynamically
+MONGODB_URI = f"mongodb+srv://{MONGODB_USER}:{MONGODB_PASSWORD}@bank.hphlh.mongodb.net/banking_db?retryWrites=true&w=majority&appName=bank"
+
+# Configure Flask app with MongoDB URI
+app.config["MONGO_URI"] = MONGODB_URI
 mongo = PyMongo(app)
 
-# Function to insert bank data into the MongoDB
-def insert_initial_data():
-    db = mongo.db  # Use the PyMongo connection already established
-    collection = db["banks"]
 
-    data = {
-        "banks": [
+def insert_initial_data():
+    try:
+        # Get the banks collection (it will be created if it doesn't exist)
+        collection = mongo.db.banks
+
+        banks_data = [
             {
                 "name": "Greenfield Bank",
                 "type": "Commercial Bank",
@@ -146,73 +154,85 @@ def insert_initial_data():
                 "competitors": ["Greenfield Bank", "Sunrise Financial"],
             },
         ]
-    }
 
-    # Insert data into the MongoDB collection only if it doesn't already exist
-    for bank in data["banks"]:
-        # Check if the bank already exists by its name
-        existing_bank = collection.find_one({"name": bank["name"]})
-        if not existing_bank:  # If no existing document found with this name
-            result = collection.insert_one(bank)
-            print(f"Inserted {bank['name']} into MongoDB.")
-        else:
-            print(f"Bank '{bank['name']}' already exists, skipping insertion.")
+        # Insert each bank individually
+        for bank in banks_data:
+            existing_bank = collection.find_one({"name": bank["name"]})
+            if not existing_bank:
+                collection.insert_one(bank)
+                print(f"Inserted {bank['name']} into MongoDB.")
+            else:
+                print(f"Bank '{bank['name']}' already exists, skipping insertion.")
+
+        return True
+    except Exception as e:
+        print(f"Error inserting initial data: {str(e)}")
+        return False
+
 
 @app.route("/api/banks", methods=["GET"])
 def get_banks():
     try:
-        # Retrieve all banks from the MongoDB collection
         banks = list(mongo.db.banks.find({}, {"_id": 0}))
         return jsonify(banks)
     except Exception as e:
-        return jsonify({"error": f"Failed to connect to MongoDB: {str(e)}"}), 500
+        return jsonify({"error": f"Failed to retrieve banks: {str(e)}"}), 500
 
-# User Authentication Routes
+
 @app.route("/signup", methods=["POST"])
 def signup():
     data = request.json
     email = data["email"]
-    
-    # Check if user already exists by email
+
     existing_user = mongo.db.users.find_one({"email": email})
     if existing_user:
         return jsonify({"message": "Email already in use"}), 400
 
-    # If not, hash the password and insert the new user into the database
     hashed_pw = generate_password_hash(data["password"])
     mongo.db.users.insert_one({"email": email, "password": hashed_pw})
-    
+
     return jsonify({"message": "User created"}), 201
+
 
 @app.route("/signin", methods=["POST"])
 def signin():
     data = request.json
     user = mongo.db.users.find_one({"email": data["email"]})
-    
+
     if user and check_password_hash(user["password"], data["password"]):
         session["user"] = data["email"]
         return jsonify({"message": "Logged in"}), 200
     return jsonify({"message": "Invalid credentials"}), 401
+
 
 @app.route("/apply-card", methods=["POST"])
 def apply_card():
     data = request.json
 
     # Validate required fields
-    if not data.get("name") or not data.get("email") or not data.get("cardType"):
-        return jsonify({"message": "All fields are required"}), 400
+    required_fields = ["name", "email", "cardType", "address", "phone", "dob", "income", "agreeTerms"]
+    for field in required_fields:
+        if not data.get(field):
+            return jsonify({"message": f"{field} is required"}), 400
 
-    # Insert application into MongoDB
+    # Insert into the database
     mongo.db.card_applications.insert_one({
         "name": data["name"],
         "email": data["email"],
         "cardType": data["cardType"],
+        "address": data["address"],
+        "phone": data["phone"],
+        "dob": data["dob"],
+        "income": data["income"],
+        "agreeTerms": data["agreeTerms"],
     })
 
     return jsonify({"message": "Application submitted successfully!"}), 201
 
-    
-    
+
 if __name__ == "__main__":
-    insert_initial_data()  # Insert the data when the app starts
-    app.run(debug=True)
+    if insert_initial_data():
+        print("Initial data inserted successfully")
+        app.run(debug=True)
+    else:
+        print("Failed to insert initial data")
