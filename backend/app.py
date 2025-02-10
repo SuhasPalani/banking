@@ -5,6 +5,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 import os
 import pymongo
+from bson import ObjectId
+import requests
 
 # Load environment variables from .env file
 load_dotenv()
@@ -28,6 +30,11 @@ MONGODB_URI = f"mongodb+srv://{MONGODB_USER}:{MONGODB_PASSWORD}@bank.hphlh.mongo
 app.config["MONGO_URI"] = MONGODB_URI
 mongo = PyMongo(app)
 
+# EmailJS configuration
+EMAILJS_USER_ID = "duGyQMPA15QXvU-LA"
+EMAILJS_SERVICE_ID = "default_service"
+EMAILJS_TEMPLATE_ID_APPROVAL = "template_jwoiro3"
+EMAILJS_TEMPLATE_ID_REJECTION = "template_jwoiro3"
 
 def insert_initial_data():
     try:
@@ -229,6 +236,71 @@ def apply_card():
 
     return jsonify({"message": "Application submitted successfully!"}), 201
 
+def send_email(to_email, template_id, template_params):
+    url = "https://api.emailjs.com/api/v1.0/email/send"
+    payload = {
+        "user_id": EMAILJS_USER_ID,
+        "service_id": EMAILJS_SERVICE_ID,
+        "template_id": template_id,
+        "template_params": {
+            "to_email": to_email,
+            **template_params
+        }
+    }
+    headers = {"Content-Type": "application/json"}
+    response = requests.post(url, json=payload, headers=headers)
+    return response.status_code == 200
+
+@app.route("/admin_console", methods=["GET"])
+def get_card_applications():
+    try:
+        applications = list(mongo.db.card_applications.find())
+        for app in applications:
+            app['_id'] = str(app['_id'])
+            if 'status' not in app:
+                app['status'] = 'Pending'
+        return jsonify(applications)
+    except Exception as e:
+        print(f"Error fetching applications: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/admin_console/approve/<application_id>", methods=["POST"])
+def approve_application(application_id):
+    try:
+        application = mongo.db.card_applications.find_one_and_update(
+            {"_id": ObjectId(application_id)},
+            {"$set": {"status": "Approved"}},
+            return_document=True
+        )
+        
+        if application:
+            # Send approval email here
+            # For now, we'll just print a message
+            print(f"Approval email sent to {application['email']}")
+            return jsonify({"message": "Application approved and email sent"}), 200
+        return jsonify({"message": "Application not found"}), 404
+    except Exception as e:
+        print(f"Error approving application: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/admin_console/reject/<application_id>", methods=["POST"])
+def reject_application(application_id):
+    try:
+        application = mongo.db.card_applications.find_one_and_update(
+            {"_id": ObjectId(application_id)},
+            {"$set": {"status": "Rejected"}},
+            return_document=True
+        )
+        
+        if application:
+            # Send rejection email here
+            # For now, we'll just print a message
+            print(f"Rejection email sent to {application['email']}")
+            return jsonify({"message": "Application rejected and email sent"}), 200
+        return jsonify({"message": "Application not found"}), 404
+    except Exception as e:
+        print(f"Error rejecting application: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     if insert_initial_data():
