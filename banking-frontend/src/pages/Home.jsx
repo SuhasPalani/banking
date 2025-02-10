@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import BankCard from '../components/BankCard';
+import '../App.css';
 
 export default function Home() {
   const [banks, setBanks] = useState([]);

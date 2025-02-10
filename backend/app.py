@@ -217,7 +217,7 @@ def apply_card():
     data = request.json
 
     # Validate required fields
-    required_fields = ["name", "email", "cardType", "address", "phone", "dob", "income", "agreeTerms"]
+    required_fields = ["name", "email", "cardType", "address", "phone", "dob", "income", "agreeTerms", "bankName"]
     for field in required_fields:
         if not data.get(field):
             return jsonify({"message": f"{field} is required"}), 400
@@ -232,6 +232,7 @@ def apply_card():
         "dob": data["dob"],
         "income": data["income"],
         "agreeTerms": data["agreeTerms"],
+        "bankName": data["bankName"],  # Add bankName to the data
     })
 
     return jsonify({"message": "Application submitted successfully!"}), 201

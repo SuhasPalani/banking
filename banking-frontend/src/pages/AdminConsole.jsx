@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import emailjs from 'emailjs-com'; // Import EmailJS
-import "../Console.css";
+import emailjs from "emailjs-com"; // Import EmailJS
+import '../App.css';
 
 export default function AdminConsole() {
   const [applications, setApplications] = useState([]);
@@ -38,22 +38,23 @@ export default function AdminConsole() {
     };
 
     // Send email via EmailJS
-    emailjs.send(
-      emailJsConfig.serviceId,
-      emailJsConfig.templateId,
-      emailParams,
-      emailJsConfig.userId
-    )
-    .then(
-      (response) => {
-        console.log("Email sent successfully:", response);
-        alert(message);  // Show a success message to the admin
-      },
-      (error) => {
-        console.error("Error sending email:", error);
-        alert("Failed to send email.");
-      }
-    );
+    emailjs
+      .send(
+        emailJsConfig.serviceId,
+        emailJsConfig.templateId,
+        emailParams,
+        emailJsConfig.userId
+      )
+      .then(
+        (response) => {
+          console.log("Email sent successfully:", response);
+          alert(message); // Show a success message to the admin
+        },
+        (error) => {
+          console.error("Error sending email:", error);
+          alert("Failed to send email.");
+        }
+      );
   };
 
   const handleApprove = async (id, email) => {
@@ -68,7 +69,11 @@ export default function AdminConsole() {
 
       if (response.ok) {
         // Send Approval Email
-        sendEmail(email, "Your Application has been Approved", "Congratulations! Your application for a card has been approved.");
+        sendEmail(
+          email,
+          "Your Application has been Approved",
+          "Congratulations! Your application for a card has been approved."
+        );
         alert(`Application approved! Email sent: ${data.message}`);
       } else {
         alert(`Approval failed: ${data.message}`);
@@ -93,7 +98,11 @@ export default function AdminConsole() {
 
       if (response.ok) {
         // Send Rejection Email
-        sendEmail(email, "Your Application has been Rejected", "We're sorry, but your application for a card has been rejected.");
+        sendEmail(
+          email,
+          "Your Application has been Rejected",
+          "We're sorry, but your application for a card has been rejected."
+        );
         alert(`Application rejected! Email sent: ${data.message}`);
       } else {
         alert(`Rejection failed: ${data.message}`);
@@ -116,6 +125,11 @@ export default function AdminConsole() {
             <th>Name</th>
             <th>Email</th>
             <th>Card Type</th>
+            <th>Address</th>
+            <th>Phone</th>
+            <th>DOB</th>
+            <th>Bank Name</th>
+            <th>Income</th>
             <th>Status</th>
             <th>Actions</th>
           </tr>
@@ -126,6 +140,11 @@ export default function AdminConsole() {
               <td>{app.name}</td>
               <td>{app.email}</td>
               <td>{app.cardType}</td>
+              <td>{app.address}</td> {/* Display bankName */}
+              <td>{app.phone}</td> {/* Display bankName */}
+              <td>{app.dob}</td> {/* Display bankName */}
+              <td>{app.bankName}</td> {/* Display bankName */}
+              <td>{app.income}</td> {/* Display bankName */}
               <td>{app.status || "Pending"}</td>
               <td>
                 {app.status === "Pending" && (

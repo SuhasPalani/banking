@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
-import '../Banking.css';
-
+import React, { useState, useEffect } from 'react';
+import '../App.css';
 export default function Banking() {
   const [formData, setFormData] = useState({
     name: '',
@@ -11,14 +10,35 @@ export default function Banking() {
     dob: '',
     income: '',
     agreeTerms: false,
+    bankName: '',  // Add bankName to formData
   });
+  const [banks, setBanks] = useState([]);
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Fetch bank names from the backend when the component mounts
+  useEffect(() => {
+    const fetchBanks = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/banks');
+        if (response.ok) {
+          const data = await response.json();
+          setBanks(data);
+        } else {
+          console.error("Error fetching banks:", response.statusText);
+        }
+      } catch (error) {
+        console.error("Error fetching banks:", error);
+      }
+    };
+
+    fetchBanks();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     try {
       const response = await fetch('http://localhost:5000/apply-card', {
         method: 'POST',
@@ -38,6 +58,7 @@ export default function Banking() {
           dob: '',
           income: '',
           agreeTerms: false,
+          bankName: '',  // Reset bank name
         });
       } else {
         const errorData = await response.json();
@@ -88,6 +109,23 @@ export default function Banking() {
             >
               <option value="Credit Card">Credit Card</option>
               <option value="Debit Card">Debit Card</option>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="bankName">Select Bank</label>
+            <select
+              id="bankName"
+              value={formData.bankName}
+              onChange={(e) => setFormData({ ...formData, bankName: e.target.value })}
+              required
+            >
+              <option value="">Select a bank</option>
+              {banks.map((bank) => (
+                <option key={bank.name} value={bank.name}>
+                  {bank.name}
+                </option>
+              ))}
             </select>
           </div>
 
